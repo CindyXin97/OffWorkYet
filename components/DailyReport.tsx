@@ -2,7 +2,7 @@
 import React from 'react';
 import { UserProfile, DailyLog } from '../types';
 import { CuteCharacter } from './CuteCharacter';
-import { TARGET_WORK_HOURS } from '../constants';
+import { calculateDailyPay, calculateStandardRate, getDisplayName } from '../lib/utils';
 
 interface DailyReportProps {
   profile: UserProfile;
@@ -12,10 +12,11 @@ interface DailyReportProps {
 }
 
 export const DailyReport: React.FC<DailyReportProps> = ({ profile, log, onShare, onRestart }) => {
-  const dailyIncome = profile.monthlySalary / (profile.workingDaysPerMonth || 22);
-  const standardRate = dailyIncome / TARGET_WORK_HOURS;
+  const dailyPay = calculateDailyPay(profile.monthlySalary, profile.workingDaysPerMonth);
+  const standardRate = calculateStandardRate(dailyPay);
   const diffPercent = ((log.hourlyRate / standardRate) - 1) * 100;
   const isBetter = log.hourlyRate > standardRate;
+  const displayName = getDisplayName(profile);
 
   return (
     <div className="flex flex-col h-full bg-[#fffcf0] p-5 pb-6">
@@ -45,7 +46,7 @@ export const DailyReport: React.FC<DailyReportProps> = ({ profile, log, onShare,
         </div>
         
         <h2 className="text-lg font-black text-[#5d4037] mb-4 text-center px-4 leading-tight">
-          Today's Vibe Check:<br/><span className="text-[#2d5a27]">{profile.riceName}!</span>
+          Today's Vibe Check:<br/><span className="text-[#2d5a27]">{displayName}!</span>
         </h2>
 
         <div className="w-full space-y-2">

@@ -4,7 +4,7 @@ import React from 'react';
 interface CuteCharacterProps {
   mood: 'happy' | 'chill' | 'sad' | 'work';
   size?: number;
-  accessory?: 'sushi' | 'toast' | 'coffee' | 'none';
+  accessory?: 'sushi' | 'salad' | 'toast' | 'coffee' | 'none';
 }
 
 export const CuteCharacter: React.FC<CuteCharacterProps> = ({ mood, size = 120, accessory = 'none' }) => {
@@ -50,19 +50,20 @@ export const CuteCharacter: React.FC<CuteCharacterProps> = ({ mood, size = 120, 
         {(mood === 'happy' || mood === 'work') && <path d="M45,60 Q50,65 55,60" fill="none" stroke="black" strokeWidth="2" />}
       </svg>
       
-      {/* Redesigned Accessories as Floating Bubbles - Shifted further left to prevent text overlap */}
+      {/* Accessories - left side */}
       {accessory === 'sushi' && (
-        <div className="absolute -top-6 -left-12 bg-white border-2 border-black px-3 py-1.5 rounded-2xl flex items-center gap-1 shadow-[3px_3px_0px_0px_#000] -rotate-6 z-10 whitespace-nowrap">
-           <span className="text-lg">🍣</span>
-           <span className="text-[10px] font-black tracking-tighter">VIBE!</span>
-           <div className="absolute -bottom-1 right-3 w-2 h-2 bg-white border-b-2 border-r-2 border-black rotate-45"></div>
+        <div className="absolute top-0 -left-12 bg-white border-2 border-black px-3 py-1.5 rounded-2xl flex items-center shadow-[2px_2px_0px_0px_#000] -rotate-6 z-10">
+           <span className="text-xl">🍣</span>
+        </div>
+      )}
+      {accessory === 'salad' && (
+        <div className="absolute top-0 -left-12 bg-green-50 border-2 border-black px-3 py-1.5 rounded-2xl flex items-center shadow-[2px_2px_0px_0px_#000] -rotate-3 z-10">
+           <span className="text-xl">🥗</span>
         </div>
       )}
       {accessory === 'toast' && (
-        <div className="absolute -top-6 -left-12 bg-orange-50 border-2 border-black px-3 py-1.5 rounded-2xl flex items-center gap-1 shadow-[3px_3px_0px_0px_#000] rotate-6 z-10 whitespace-nowrap">
-           <span className="text-lg">🍞</span>
-           <span className="text-[10px] font-black tracking-tighter uppercase">Toasty</span>
-           <div className="absolute -bottom-1 right-3 w-2 h-2 bg-orange-50 border-b-2 border-r-2 border-black rotate-45"></div>
+        <div className="absolute top-0 -left-12 bg-orange-50 border-2 border-black px-3 py-1.5 rounded-2xl flex items-center shadow-[2px_2px_0px_0px_#000] rotate-6 z-10">
+           <span className="text-xl">🍞</span>
         </div>
       )}
       {accessory === 'coffee' && (

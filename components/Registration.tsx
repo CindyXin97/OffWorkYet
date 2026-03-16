@@ -1,34 +1,35 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { CuteCharacter } from './CuteCharacter';
 
 interface RegistrationProps {
   initialData?: UserProfile;
-  onComplete: (profile: UserProfile) => void;
+  onLogin: (email: string, password: string) => Promise<void>;
+  onRegister: (profile: UserProfile & { password?: string; email?: string }) => Promise<void>;
+  onUpdateProfile: (profile: UserProfile) => Promise<void>;
   onCancel?: () => void;
 }
 
-type Step = 'LOGIN' | 'REGISTER_EMAIL' | 'VERIFY' | 'GRIND' | 'SALARY';
+type Step = 'LOGIN' | 'REGISTER_EMAIL' | 'REGISTER_PROFILE' | 'GRIND' | 'SALARY';
 
-export const Registration: React.FC<RegistrationProps> = ({ initialData, onComplete, onCancel }) => {
+export const Registration: React.FC<RegistrationProps> = ({ initialData, onLogin, onRegister, onUpdateProfile, onCancel }) => {
   const [step, setStep] = useState<Step>(initialData?.isRegistered ? 'GRIND' : 'LOGIN');
   
-  const [form, setForm] = useState(initialData || {
-    riceName: '',
+  const [form, setForm] = useState({
+    riceName: initialData?.riceName || '',
     password: '',
     email: '',
-    city: '',
-    jobTitle: 'Senior SWE',
-    company: 'Meta',
-    monthlySalary: 2200,
-    workingDaysPerMonth: 22,
-    isRegistered: false,
-    name: 'User'
+    city: initialData?.city || '',
+    jobTitle: initialData?.jobTitle || 'Senior SWE',
+    company: initialData?.company || 'Meta',
+    monthlySalary: initialData?.monthlySalary || 2200,
+    workingDaysPerMonth: initialData?.workingDaysPerMonth || 22,
+    isRegistered: initialData?.isRegistered || false,
+    name: initialData?.name || 'User',
   });
 
-  const [verifyCode, setVerifyCode] = useState('');
   const [isLocating, setIsLocating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const detectLocation = () => {
     if (!("geolocation" in navigator)) {
@@ -39,8 +40,6 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        // Since we don't have a backend geocoder, we format a readable location string
-        // In a real app, this would use an API to get the actual city name.
         const city = `Global District #${Math.floor(pos.coords.latitude)}`;
         setForm(prev => ({ ...prev, city: city }));
         setIsLocating(false);
@@ -56,18 +55,18 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
   const handlePrev = () => {
     if (step === 'LOGIN') return;
     else if (step === 'REGISTER_EMAIL') setStep('LOGIN');
-    else if (step === 'VERIFY') setStep('REGISTER_EMAIL');
+    else if (step === 'REGISTER_PROFILE') setStep('REGISTER_EMAIL');
     else if (step === 'GRIND') {
-        if (initialData?.isRegistered && onCancel) onCancel(); 
-        else setStep('VERIFY');
+      if (initialData?.isRegistered && onCancel) onCancel();
+      else setStep('REGISTER_PROFILE');
     }
     else if (step === 'SALARY') setStep('GRIND');
   };
 
   const isFormValid = () => {
-    if (step === 'LOGIN') return form.riceName && form.password;
-    if (step === 'REGISTER_EMAIL') return form.email && form.email.includes('@');
-    if (step === 'VERIFY') return verifyCode.length === 4;
+    if (step === 'LOGIN') return form.email && form.email.includes('@') && form.password;
+    if (step === 'REGISTER_EMAIL') return form.email && form.email.includes('@') && form.password && form.password.length >= 6;
+    if (step === 'REGISTER_PROFILE') return form.riceName.trim().length > 0;
     return true;
   };
 
@@ -84,11 +83,11 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
         ) : <div className="w-10" />}
         
         <div className="flex gap-1.5">
-          {['LOGIN', 'REG', 'CODE', 'JOB', 'PAY'].map((s, i) => (
+          {['LOGIN', 'EMAIL', 'PROFILE', 'JOB', 'PAY'].map((s, i) => (
             <div 
               key={s} 
               className={`h-2 rounded-full border border-black transition-all duration-300 ${
-                ['LOGIN', 'REGISTER_EMAIL', 'VERIFY', 'GRIND', 'SALARY'].indexOf(step) >= i ? 'bg-[#7be0ae] w-8' : 'bg-gray-200 w-4'
+                ['LOGIN', 'REGISTER_EMAIL', 'REGISTER_PROFILE', 'GRIND', 'SALARY'].indexOf(step) >= i ? 'bg-[#7be0ae] w-8' : 'bg-gray-200 w-4'
               }`} 
             />
           ))}
@@ -99,8 +98,8 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
       <div className="text-center mb-4">
         <h1 className="text-2xl font-black text-[#2d5a27] mb-1 leading-tight">
           {step === 'LOGIN' && "Welcome Back!"}
-          {step === 'REGISTER_EMAIL' && "New Account"}
-          {step === 'VERIFY' && "Verify Email"}
+          {step === 'REGISTER_EMAIL' && "Create Account"}
+          {step === 'REGISTER_PROFILE' && "Your Profile"}
           {step === 'GRIND' && (initialData?.isRegistered ? "Edit Work Info" : "The Grind")}
           {step === 'SALARY' && "Money & Vibe"}
         </h1>
@@ -113,20 +112,20 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
         {step === 'LOGIN' && (
           <div className="space-y-2.5">
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Rice Ball Nickname</label>
+              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Email</label>
               <div className="flex items-center gap-2.5 bg-gray-50 p-2.5 rounded-lg border-2 border-black focus-within:bg-white transition-colors">
-                <span className="text-base">🍙</span>
+                <span className="text-base">📧</span>
                 <input 
-                  type="text" 
-                  value={form.riceName} 
-                  onChange={e => setForm({...form, riceName: e.target.value})}
+                  type="email" 
+                  value={form.email} 
+                  onChange={e => setForm({...form, email: e.target.value})}
                   className="bg-transparent w-full font-bold focus:outline-none text-sm"
-                  placeholder="e.g. Sushi Master"
+                  placeholder="you@example.com"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Secret Password</label>
+              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Password</label>
               <div className="flex items-center gap-2.5 bg-gray-50 p-2.5 rounded-lg border-2 border-black focus-within:bg-white transition-colors">
                 <span className="text-base">🔑</span>
                 <input 
@@ -139,19 +138,23 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
               </div>
             </div>
             <button 
-              onClick={() => onComplete({ ...form, isRegistered: true })}
-              disabled={!isFormValid()}
+              onClick={async () => {
+                if (!isFormValid()) return;
+                setSubmitting(true);
+                try { await onLogin(form.email, form.password); } finally { setSubmitting(false); }
+              }}
+              disabled={!isFormValid() || submitting}
               className={`w-full py-2.5 rounded-lg font-black text-lg cute-button transition-all ${
-                isFormValid() ? 'bg-[#7be0ae] text-white' : 'bg-gray-200 text-gray-400'
+                isFormValid() && !submitting ? 'bg-[#7be0ae] text-white' : 'bg-gray-200 text-gray-400'
               }`}
             >
-              Log In
+              {submitting ? '...' : 'Log In'}
             </button>
             <button 
               onClick={() => setStep('REGISTER_EMAIL')}
               className="w-full text-xs font-black text-gray-400 uppercase tracking-widest"
             >
-              Register with Email
+              Create New Account
             </button>
           </div>
         )}
@@ -159,7 +162,7 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
         {step === 'REGISTER_EMAIL' && (
           <div className="space-y-2.5">
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Email Address</label>
+              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Email</label>
               <div className="flex items-center gap-2.5 bg-gray-50 p-2.5 rounded-lg border-2 border-black">
                 <span className="text-base">📧</span>
                 <input 
@@ -171,43 +174,73 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
                 />
               </div>
             </div>
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Password (min 6 chars)</label>
+              <div className="flex items-center gap-2.5 bg-gray-50 p-2.5 rounded-lg border-2 border-black">
+                <span className="text-base">🔑</span>
+                <input 
+                  type="password" 
+                  value={form.password} 
+                  onChange={e => setForm({...form, password: e.target.value})}
+                  className="bg-transparent w-full font-bold focus:outline-none text-sm"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
             <button 
-              onClick={() => setStep('VERIFY')}
+              onClick={() => setStep('REGISTER_PROFILE')}
               disabled={!isFormValid()}
               className={`w-full py-2.5 rounded-lg font-black text-lg cute-button transition-all ${
                 isFormValid() ? 'bg-black text-white' : 'bg-gray-200 text-gray-400'
               }`}
             >
-              Send Code
+              Next
             </button>
           </div>
         )}
 
-        {step === 'VERIFY' && (
-          <div className="space-y-2.5 text-center">
-            <p className="text-[10px] font-bold text-gray-500">Enter code sent to {form.email}</p>
-            <div className="flex justify-center gap-2">
-              <input 
-                type="text" 
-                maxLength={4}
-                value={verifyCode}
-                onChange={e => setVerifyCode(e.target.value)}
-                className="w-32 bg-gray-50 p-2.5 rounded-lg border-2 border-black text-center text-xl font-black tracking-[0.5em] focus:outline-none"
-                placeholder="0000"
-              />
+        {step === 'REGISTER_PROFILE' && (
+          <div className="space-y-2.5">
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Rice Ball Nickname</label>
+              <div className="flex items-center gap-2.5 bg-gray-50 p-2.5 rounded-lg border-2 border-black">
+                <span className="text-base">🍙</span>
+                <input 
+                  type="text" 
+                  value={form.riceName} 
+                  onChange={e => setForm({...form, riceName: e.target.value})}
+                  className="bg-transparent w-full font-bold focus:outline-none text-sm"
+                  placeholder="e.g. Sushi Master"
+                />
+              </div>
             </div>
             <button 
               onClick={() => setStep('GRIND')}
               disabled={!isFormValid()}
-              className={`w-full py-2.5 rounded-lg font-black text-lg bg-[#7be0ae] text-white cute-button`}
+              className={`w-full py-2.5 rounded-lg font-black text-lg cute-button transition-all ${
+                isFormValid() ? 'bg-[#7be0ae] text-white' : 'bg-gray-200 text-gray-400'
+              }`}
             >
-              Verify Code
+              Next
             </button>
           </div>
         )}
 
         {step === 'GRIND' && (
           <div className="space-y-2.5">
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-2 tracking-widest">Your Name</label>
+              <div className="flex items-center gap-2.5 bg-gray-50 p-2.5 rounded-lg border-2 border-black">
+                <span className="text-base">👤</span>
+                <input 
+                  type="text" 
+                  value={form.name === 'User' ? '' : form.name} 
+                  onChange={e => setForm({...form, name: e.target.value || 'User'})}
+                  className="bg-transparent w-full font-bold focus:outline-none text-sm"
+                  placeholder="Your display name"
+                />
+              </div>
+            </div>
             <div>
               <div className="flex justify-between items-center mb-1 ml-2">
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">City</label>
@@ -291,10 +324,20 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
               </div>
             </div>
             <button 
-              onClick={() => onComplete({ ...form, isRegistered: true })}
-              className="w-full py-2.5 rounded-lg font-black text-lg bg-[#7be0ae] text-white cute-button"
+              onClick={async () => {
+                setSubmitting(true);
+                try {
+                  if (initialData?.isRegistered) {
+                    await onUpdateProfile({ ...form, isRegistered: true });
+                  } else {
+                    await onRegister({ ...form, isRegistered: true });
+                  }
+                } finally { setSubmitting(false); }
+              }}
+              disabled={submitting}
+              className="w-full py-2.5 rounded-lg font-black text-lg bg-[#7be0ae] text-white cute-button disabled:opacity-70"
             >
-              {initialData?.isRegistered ? "Update & Save" : "Save & Finish"}
+              {submitting ? '...' : (initialData?.isRegistered ? "Update & Save" : "Save & Finish")}
             </button>
           </div>
         )}
