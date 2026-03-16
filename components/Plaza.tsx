@@ -10,6 +10,7 @@ interface PlazaProps {
   profile: UserProfile;
   history: DailyLog[];
   onBack: () => void;
+  onDeleteLog?: (date: string) => Promise<void>;
 }
 
 type PlazaTab = 'MY_VIBES' | 'TOAST_CREW' | 'MY_NETWORK';
@@ -106,7 +107,7 @@ interface MarketBenchmarkDisplay {
   userCount: number;
 }
 
-export const Plaza: React.FC<PlazaProps> = ({ profile, history, onBack }) => {
+export const Plaza: React.FC<PlazaProps> = ({ profile, history, onBack, onDeleteLog }) => {
   const [activeTab, setActiveTab] = useState<PlazaTab>('MY_VIBES');
   const [hugs, setHugs] = useState<Record<string, boolean>>({});
   const [crew, setCrew] = useState<PeerLog[]>([]);
@@ -238,8 +239,22 @@ export const Plaza: React.FC<PlazaProps> = ({ profile, history, onBack }) => {
                         </p>
                       )}
                    </div>
-                   <div className="text-2xl">
-                      {log.vibe === 'Sushi' ? '🍣' : log.vibe === 'Salad' ? '🥗' : '🥖'}
+                   <div className="flex items-center gap-2">
+                      <div className="text-2xl">
+                         {log.vibe === 'Sushi' ? '🍣' : log.vibe === 'Salad' ? '🥗' : '🥖'}
+                      </div>
+                      {onDeleteLog && (
+                        <button
+                          onClick={() => {
+                            if (confirm(`Delete record for ${shortDate}?`)) {
+                              onDeleteLog(log.date);
+                            }
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full"
+                        >
+                          🗑️
+                        </button>
+                      )}
                    </div>
                 </div>
              )})}

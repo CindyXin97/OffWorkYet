@@ -325,6 +325,16 @@ const App: React.FC = () => {
 
   const clearApiError = useCallback(() => setApiError(null), []);
 
+  const handleDeleteLog = useCallback(async (date: string) => {
+    try {
+      await api.dailyLogs.delete(date);
+      setHistory((h) => h.filter((log) => log.date !== date));
+    } catch (e) {
+      console.error('Failed to delete log:', e);
+      setApiError('Failed to delete record');
+    }
+  }, []);
+
   if (loading) {
     return (
       <Layout>
@@ -375,6 +385,7 @@ const App: React.FC = () => {
           profile={profile}
           history={history}
           onBack={() => setView('TRACKER')}
+          onDeleteLog={handleDeleteLog}
         />
       )}
     </Layout>

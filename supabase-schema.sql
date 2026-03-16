@@ -96,6 +96,10 @@ CREATE POLICY "Users can update own daily logs"
   ON daily_logs FOR UPDATE
   USING (auth.uid() = user_id);
 
+CREATE POLICY "Users can delete own daily logs"
+  ON daily_logs FOR DELETE
+  USING (auth.uid() = user_id);
+
 -- Profiles: allow viewing other profiles (for Plaza crew names)
 CREATE POLICY "Users can view all profiles"
   ON profiles FOR SELECT

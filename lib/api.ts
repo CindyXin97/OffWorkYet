@@ -282,6 +282,19 @@ export const dailyLogs = {
 
     if (error) throw new Error(error.message);
   },
+
+  async delete(date: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not logged in');
+
+    const { error } = await supabase
+      .from('daily_logs')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('date', date);
+
+    if (error) throw new Error(error.message);
+  },
 };
 
 // ----- Plaza -----
