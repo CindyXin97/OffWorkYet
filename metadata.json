@@ -1,0 +1,7 @@
+{
+  "name": "Off Work Yet? (下班了吗)",
+  "description": "A cute, pastel-themed productivity and salary transparency app to track actual hourly rates and compare with peers.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
