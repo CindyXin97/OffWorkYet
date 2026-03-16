@@ -124,18 +124,18 @@ export const Plaza: React.FC<PlazaProps> = ({ profile, history, onBack }) => {
 
   return (
     <div className="flex flex-col h-full bg-[#f0eaff]">
-      <div className="p-6 pb-2">
-        <div className="flex items-center gap-4 mb-6">
-           <button onClick={onBack} className="text-2xl font-black">←</button>
-           <h1 className="text-2xl font-black">The Plaza</h1>
+      <div className="p-5 pb-1">
+        <div className="flex items-center gap-3 mb-4">
+           <button onClick={onBack} className="text-xl font-black">←</button>
+           <h1 className="text-xl font-black">The Plaza</h1>
         </div>
 
-        <div className="flex bg-white/50 p-1 rounded-2xl border-2 border-black">
+        <div className="flex bg-white/50 p-1 rounded-xl border-2 border-black">
           {(['MY_VIBES', 'TOAST_CREW', 'MY_NETWORK'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 text-xs font-black rounded-xl transition-all ${
+              className={`flex-1 py-1.5 text-[10px] font-black rounded-lg transition-all ${
                 activeTab === tab ? 'bg-black text-white' : 'text-gray-600'
               }`}
             >
@@ -145,7 +145,7 @@ export const Plaza: React.FC<PlazaProps> = ({ profile, history, onBack }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 pt-2">
+      <div className="flex-1 overflow-y-auto p-5 pt-1">
         {activeTab === 'MY_VIBES' && (
           <div className="space-y-3">
              <div className="bg-[#d1f9e5] p-5 cute-card rounded-2xl">
@@ -236,23 +236,23 @@ export const Plaza: React.FC<PlazaProps> = ({ profile, history, onBack }) => {
 
         {activeTab === 'MY_NETWORK' && (
           <div className="space-y-4 pb-8">
-             <div className="bg-[#fff9e6] p-4 cute-card rounded-2xl text-center mb-6">
-                <p className="text-sm font-black uppercase tracking-widest">Market Benchmarks</p>
+             <div className="bg-[#fff9e6] p-3 cute-card rounded-xl text-center mb-4">
+                <p className="text-xs font-black uppercase tracking-widest">Market Benchmarks</p>
              </div>
              {MOCK_NETWORK.map((item, i) => (
-               <div key={i} className="bg-white p-5 cute-card rounded-3xl flex justify-between items-center">
-                  <div className="flex gap-4 items-center">
-                    <div className="w-12 h-12 bg-blue-50 border-2 border-black rounded-2xl flex items-center justify-center font-black text-blue-600 shadow-[2px_2px_0px_0px_#000]">
+               <div key={i} className="bg-white p-4 cute-card rounded-2xl flex justify-between items-center">
+                  <div className="flex gap-3 items-center">
+                    <div className="w-10 h-10 bg-blue-50 border-2 border-black rounded-xl flex items-center justify-center font-black text-blue-600 shadow-[1.5px_1.5px_0px_0px_#000]">
                        {item.company[0]}
                     </div>
                     <div>
-                       <h3 className="font-black text-lg">{item.company}</h3>
-                       <p className="text-xs text-gray-500 font-bold">{item.role}</p>
+                       <h3 className="font-black text-base">{item.company}</h3>
+                       <p className="text-[10px] text-gray-500 font-bold">{item.role}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                     <p className="font-black text-lg">${item.baseRate.toFixed(0)} / hr</p>
-                     <p className="text-[10px] font-bold text-green-500">{item.vibe} Vibe</p>
+                     <p className="font-black text-base">${item.baseRate.toFixed(0)} / hr</p>
+                     <p className="text-[9px] font-bold text-green-500">{item.vibe} Vibe</p>
                   </div>
                </div>
              ))}

@@ -96,20 +96,20 @@ export const Registration: React.FC<RegistrationProps> = ({ initialData, onCompl
         <div className="w-10" />
       </div>
 
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-black text-[#2d5a27] mb-2 leading-tight">
+      <div className="text-center mb-4">
+        <h1 className="text-2xl font-black text-[#2d5a27] mb-1 leading-tight">
           {step === 'LOGIN' && "Welcome Back!"}
           {step === 'REGISTER_EMAIL' && "New Account"}
           {step === 'VERIFY' && "Verify Email"}
           {step === 'GRIND' && (initialData?.isRegistered ? "Edit Work Info" : "The Grind")}
           {step === 'SALARY' && "Money & Vibe"}
         </h1>
-        <div className="flex justify-center my-4">
-          <CuteCharacter mood="happy" size={step === 'LOGIN' ? 140 : 100} />
+        <div className="flex justify-center my-3">
+          <CuteCharacter mood="happy" size={step === 'LOGIN' ? 120 : 90} />
         </div>
       </div>
 
-      <div className="bg-white p-4 cute-card rounded-2xl space-y-3">
+      <div className="bg-white p-3.5 cute-card rounded-xl space-y-2.5">
         {step === 'LOGIN' && (
           <div className="space-y-2.5">
             <div>
